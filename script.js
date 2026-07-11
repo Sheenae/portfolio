@@ -79,6 +79,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   revealEls.forEach(el => revealObserver.observe(el));
 
+  /* ---------- Skills marquee ---------- */
+  const skillsTrack = document.querySelector('.skills-strip-track');
+  if (skillsTrack && !skillsTrack.dataset.marqueeReady) {
+    const originalCards = Array.from(skillsTrack.children);
+    originalCards.forEach(card => {
+      const clone = card.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      skillsTrack.appendChild(clone);
+    });
+    skillsTrack.dataset.marqueeReady = 'true';
+  }
+
   /* ---------- Back to top ---------- */
   const backToTop = document.getElementById('backToTop');
   window.addEventListener('scroll', () => {
@@ -277,5 +289,93 @@ document.addEventListener('DOMContentLoaded', () => {
     buildDots();
     syncState();
   });
+
+  /* ---------- Personal Projects Carousel ---------- */
+  const ppCarousel = document.querySelector('.pp-carousel');
+  if (ppCarousel) {
+    const viewport = ppCarousel.querySelector('.pp-viewport');
+    const track = ppCarousel.querySelector('.pp-track');
+    const baseCards = Array.from(track.querySelectorAll('.pp-card'));
+    const dotsWrap = ppCarousel.querySelector('.pp-dots');
+    const prevBtn = ppCarousel.querySelector('.pp-prev');
+    const nextBtn = ppCarousel.querySelector('.pp-next');
+    if (baseCards.length < 3) return;
+
+    // Clone edge cards so the 3-card viewport always has left + center + right cards.
+    const firstClone = baseCards[0].cloneNode(true);
+    const lastClone = baseCards[baseCards.length - 1].cloneNode(true);
+    firstClone.setAttribute('aria-hidden', 'true');
+    lastClone.setAttribute('aria-hidden', 'true');
+    track.insertBefore(lastClone, baseCards[0]);
+    track.appendChild(firstClone);
+
+    const allCards = Array.from(track.querySelectorAll('.pp-card'));
+    let active = Math.min(1, baseCards.length - 1); // start centered at the admin card
+
+    const toPhysicalIndex = (logicalIndex) => logicalIndex + 1; // account for prepended clone
+
+    const buildProjectDots = () => {
+      dotsWrap.innerHTML = '';
+      baseCards.forEach((_, i) => {
+        const btn = document.createElement('button');
+        btn.className = `pp-dot${i === active ? ' is-active' : ''}`;
+        btn.setAttribute('aria-label', `Show project ${i + 1}`);
+        btn.addEventListener('click', () => setActive(i));
+        dotsWrap.appendChild(btn);
+      });
+    };
+
+    const centerActiveCard = () => {
+      const physicalIndex = toPhysicalIndex(active);
+      const card = allCards[physicalIndex];
+      if (!card) return;
+
+      const gap = parseFloat(getComputedStyle(track).gap) || 0;
+      const cardWidth = (viewport.clientWidth - (gap * 2)) / 3;
+      allCards.forEach((c) => {
+        c.style.width = `${cardWidth}px`;
+      });
+
+      allCards.forEach((c, i) => {
+        const side = i === physicalIndex - 1 || i === physicalIndex + 1;
+        c.classList.toggle('is-active', i === physicalIndex);
+        c.classList.toggle('is-side', side);
+      });
+
+      const viewportCenter = viewport.clientWidth / 2;
+      const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+      track.style.transform = `translateX(${viewportCenter - cardCenter}px)`;
+
+      Array.from(dotsWrap.children).forEach((dot, i) => {
+        dot.classList.toggle('is-active', i === active);
+      });
+    };
+
+    const setActive = (index) => {
+      active = (index + baseCards.length) % baseCards.length;
+      centerActiveCard();
+    };
+
+    buildProjectDots();
+    centerActiveCard();
+
+    // Keyboard loop navigation: left/right arrows cycle endlessly.
+    ppCarousel.setAttribute('tabindex', '0');
+    ppCarousel.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        setActive(active + 1);
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setActive(active - 1);
+      }
+    });
+
+        prevBtn?.addEventListener('click', () => setActive(active - 1));
+        nextBtn?.addEventListener('click', () => setActive(active + 1));
+
+    window.addEventListener('resize', centerActiveCard);
+  }
 
 });
