@@ -1307,6 +1307,17 @@ ul{ margin:0; padding:0; list-style:none; }
   margin: 0 auto;
 }
 
+.pp-duo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.pp-duo-grid .pp-card-single {
+  width: 100%;
+  margin: 0;
+}
+
 .pp-card-single .pp-body {
   gap: 12px;
 }
@@ -1479,6 +1490,8 @@ ul{ margin:0; padding:0; list-style:none; }
   .pp-separator { width: min(760px, 100%); }
   .pp-card { width: min(520px, 74vw); }
   .pp-card-single { width: min(520px, 74vw); }
+  .pp-duo-grid { gap: 16px; }
+  .pp-duo-grid .pp-card-single { width: 100%; }
   .ach-grid{ grid-template-columns: 1fr 1fr; }
   .wtab-company{ font-size: 15px; }
   .wtab-num{ font-size: 24px; }
@@ -1521,6 +1534,8 @@ ul{ margin:0; padding:0; list-style:none; }
   .pp-group-head { margin: 24px 0 10px; }
   .pp-single { margin-top: 24px; }
   .pp-card-single { width: min(360px, 86vw); min-height: 286px; }
+  .pp-duo-grid { grid-template-columns: 1fr; }
+  .pp-duo-grid .pp-card-single { width: 100%; }
   .work-tab-bar{ grid-template-columns: 1fr; }
   .work-tab{ padding: 20px 20px 20px 24px; gap: 14px; }
   .wtab-num{ font-size: 22px; }
